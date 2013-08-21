@@ -373,7 +373,7 @@ void draw_chords()
 			{
 			moveto(hpos + 2 * grid_size, vpos);
 			printf("(");
-			ps_puts(ct_ptr->chord->chord_name);
+			ps_puts(translate(ct_ptr->chord->chord_name));
 			printf(") %d %d %d %d %d %d %d %d dots\n",
 				ct_ptr->chord->s1,
 				ct_ptr->chord->s2,

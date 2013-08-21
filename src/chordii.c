@@ -78,6 +78,7 @@ int		/* BOOLEANS */
 	auto_space = FALSE,	/* applies lyrics_only when no chords */
 	need_soc = FALSE,
 	do_toc = FALSE,
+	do_ita = FALSE,
 	no_easy_grids = FALSE,
 	i_chord_ov,             /* Overflow Booleans */
 	i_directive_ov = FALSE,
@@ -339,6 +340,7 @@ char *command;
 	fprintf (stderr, "  --text-size=N  -t             Sets text size [12]\n");
 	fprintf (stderr, "  --text-font=FONT  -T          Sets text font\n");
 	fprintf (stderr, "  --toc  -i                     Generates a table of contents\n");
+	fprintf (stderr, "  --italian  -I                 Prints Italian chord names\n");
 	fprintf (stderr, "  --transpose=N  -x             Transposes by N semi-tones\n");
 	fprintf (stderr, "  --version  -V                 Prints Chordii version and exits\n");
 	fprintf (stderr, "  --vertical-space=N  -w        Extra vertical space between lines\n");
@@ -437,6 +439,44 @@ void do_chorus_line()
 	printf ("stroke\n");
 	}
 /* --------------------------------------------------------------------------------*/
+char *en_map[] = {"A", "B", "C", "D", "E", "F", "G"} ;
+char *ita_map[] = {"La", "Si", "Do", "Re", "Mi", "Fa", "Sol"} ;
+
+char newchord[256];
+char *translate(chord)
+char *chord;
+	{
+	char *n = newchord;
+	int i, j;
+
+	if (!do_ita)
+		return chord;
+
+	for (i=0; chord[i]; i++)
+		{
+		char c = chord[i];
+		for (j=0; j<7; j++)
+			if (c == *en_map[j])
+				break;
+
+		if (j < 7)
+			{
+			/* found */
+			strcpy(n, ita_map[j]);
+			n += strlen(ita_map[j]);
+			}
+		else
+			{
+			/* raw copy */
+			*n++ = chord[i];
+			}
+		}
+    *n = '\0' ;
+
+	return newchord;
+	}
+
+/* --------------------------------------------------------------------------------*/
 void do_chord (i_text, chord)
 int i_text;
 char *chord;
@@ -488,14 +528,14 @@ void print_chord_line ()
 			printf ("dup minhpos lt\n");
 			printf ("     {pop minhpos} if\n");
 			printf ("dup /minhpos exch (");
-			ps_puts(chord_line[j]);
+			ps_puts(translate(chord_line[j]));
 			printf (") stringwidth pop add def\n");
 			printf ("%d moveto\n",vpos);
 
 
 			use_chord_font();
 			printf ("(");
-			ps_puts(chord_line[j]);
+			ps_puts(translate(chord_line[j]));
 			printf (") show\n");
 		
 			chord_line[j]= NULL;
@@ -1302,6 +1342,7 @@ static struct option long_options[] = {
   { "text-font",	      required_argument, 0, 'T' },
   { "text-size",	      required_argument, 0, 't' },
   { "toc",		      no_argument,       0, 'i' },
+  { "italian",		      no_argument,       0, 'I' },
   { "transpose",	      required_argument, 0, 'x' },
   { "version",		      no_argument,       0, 'V' },
   { "vertical-space",	      required_argument, 0, 'w' }
@@ -1319,7 +1360,7 @@ char **argv;
 
 	command_name= argv[0];
 	while ((c = getopt_long(argc, argv,
-				"aAc:C:dDgGhilLno:p:P:s:St:T:Vw:x:24",
+				"aAc:C:dDgGhiIlLno:p:P:s:St:T:Vw:x:24",
 				long_options, &option_index)) != -1)
 		switch (c) {
 
@@ -1415,6 +1456,12 @@ char **argv;
 			do_toc= TRUE;
 			number_all = TRUE;
 			break;
+
+		case 'I': /* generate Italian Chord names */
+
+			do_ita = TRUE;
+			break;
+
 
 		case 'a':
 			auto_space= TRUE;

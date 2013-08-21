@@ -149,6 +149,8 @@ void set_text_font(int size);
 char *tolower_str(char *string);
 char *toupper_str(char *string);
 extern      char *strtok(char *s1, const char *s2);
+char *translate(char *chord);
+extern int do_ita;
 #else /* __STDC__ */
 struct chord_struct *add_to_chordtab();
 struct chord_struct *add_in_order();
